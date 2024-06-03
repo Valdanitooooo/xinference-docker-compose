@@ -1,0 +1,44 @@
+name: "xinference_cluster"
+services:
+    xinference_supervisor:
+        image: xprobe/xinference:v0.11.3-cpu
+        ports:
+            - 9997:9997
+        command:  xinference-supervisor -H xinference_supervisor --log-level debug
+        volumes:
+          - /data/llmops/models/Qwen1.5-0.5B-Chat:/data/llmops/models/Qwen1.5-0.5B-Chat
+        healthcheck:
+          test: ["CMD", "curl", "-IL", "xinference_supervisor:9997"]
+          interval: 20s
+          timeout: 5s
+          retries: 6
+          start_period: 15s
+        networks:
+          - xinference-network
+    xinference_worker_01:
+        depends_on:
+          xinference_supervisor:
+            condition: service_healthy
+        image: xprobe/xinference:v0.11.3-cpu
+        environment:
+            - XINFERENCE_MODEL_SRC=modelscope
+        command: xinference-worker -H xinference_worker_01 -e "http://xinference_supervisor:9997" --log-level debug
+        volumes:
+          - /data/llmops/models/Qwen1.5-0.5B-Chat:/data/llmops/models/Qwen1.5-0.5B-Chat
+        networks:
+          - xinference-network
+    xinference_worker_02:
+        depends_on:
+          xinference_supervisor:
+            condition: service_healthy
+        image: xprobe/xinference:v0.11.3-cpu
+        environment:
+            - XINFERENCE_MODEL_SRC=modelscope
+        command: xinference-worker -H xinference_worker_02 -e "http://xinference_supervisor:9997" --log-level debug
+        volumes:
+          - /data/llmops/models/Qwen1.5-0.5B-Chat:/data/llmops/models/Qwen1.5-0.5B-Chat
+        networks:
+          - xinference-network
+
+networks:
+  xinference-network:
