@@ -1,0 +1,15 @@
+name: "xinference_standalone"
+services:
+    xinference_standalone:
+        image: xprobe/xinference:v0.11.3-cpu
+        ports:
+            - 9997:9997
+        command:  xinference-local -H 0.0.0.0 --log-level debug
+        volumes:
+          - /data/llmops/models/Qwen1.5-0.5B-Chat:/data/llmops/models/Qwen1.5-0.5B-Chat
+        healthcheck:
+          test: ["CMD", "curl", "-IL", "localhost:9997"]
+          interval: 20s
+          timeout: 5s
+          retries: 6
+          start_period: 10s
