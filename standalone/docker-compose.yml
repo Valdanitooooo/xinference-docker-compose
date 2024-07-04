@@ -13,7 +13,7 @@ services:
     environment:
       - XINFERENCE_MODEL_SRC=modelscope
     volumes:
-      - /data/llmops/models:/storage-2TB/models
+      - /data/llmops/models:/data/llmops/models
       - ./xinference:/root/.xinference
     ports:
       - 9998:9997
